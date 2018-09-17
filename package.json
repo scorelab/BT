@@ -8,7 +8,10 @@
   },
   "dependencies": {
     "react": "16.5.0",
-    "react-native": "0.57.0"
+    "react-native": "0.57.0",
+    "react-native-micro-animated-button": "0.0.27",
+    "react-native-vector-icons": "^5.0.0",
+    "react-navigation": "^2.14.2"
   },
   "devDependencies": {
     "babel-jest": "23.6.0",

@@ -7,43 +7,92 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View} from 'react-native';
+import { AppRegistry, Dimensions, ActivityIndicator, AsyncStorage, View, StyleSheet, StatusBar } from 'react-native';
+import { StackNavigator, DrawerNavigator, createStackNavigator, createSwitchNavigator, TabNavigator, TabBarBottom, createBottomTabNavigator } from 'react-navigation';
+import Ionicons from 'react-native-vector-icons/FontAwesome';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-  android:
-    'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+import BusScreen from './app/screens/busListingScreen/busListingScreen';
+import TrainScreen from './app/screens/trainListingScreen/trainListingScreen';
+import ProfileScreen from './app/screens/profileScreen/profileScreen';
+import LoginScreen from './app/screens/loginScreen/loginScreen';
 
-type Props = {};
-export default class App extends Component<Props> {
+
+class AuthLoadingScreen extends Component {
+  constructor() {
+    super();
+    this._bootstrapAsync();
+  }
+
+  _bootstrapAsync = async () => {
+    const userToken = await AsyncStorage.getItem('userToken');
+
+    this.props.navigation.navigate(userToken ? 'App' : 'Auth');
+  };
+
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>Welcome to React Native!</Text>
-        <Text style={styles.instructions}>To get started, edit App.js</Text>
-        <Text style={styles.instructions}>{instructions}</Text>
+        <ActivityIndicator />
       </View>
     );
   }
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+    justifyContent: 'center',
   },
 });
+
+const AuthStack = createStackNavigator(
+  {
+      Login:{
+          screen:LoginScreen
+      }
+  },{
+      initialRouteName:"Login",
+      headerMode:"none"
+  }
+)
+
+const AppStack = createBottomTabNavigator(
+{
+  Bus: { screen: BusScreen },
+  Train: { screen: TrainScreen },
+  Profile: { screen: ProfileScreen },
+
+},
+{
+  navigationOptions: ({ navigation }) => ({
+    tabBarIcon: ({ focused, tintColor }) => {
+      const { routeName } = navigation.state;
+      let iconName;
+      if (routeName === 'Bus') {
+        iconName = 'bus';
+      } else if (routeName === 'Train') {
+        iconName = 'train';
+      } else if (routeName === 'Profile') {
+        iconName = 'user';
+      }
+      return <Ionicons name={iconName} size={25} color={tintColor} />;
+    },
+  }),
+  tabBarOptions: {
+    activeTintColor: '#3d9bf9',
+    inactiveTintColor: 'gray',
+  },
+}  
+);
+
+
+export default createSwitchNavigator (
+  {
+      AuthLoading:AuthLoadingScreen,
+      App: AppStack,
+      Auth : AuthStack,
+  },
+  {
+      initialRouteName:'AuthLoading'
+  }
+)
